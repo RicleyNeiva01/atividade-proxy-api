@@ -20,7 +20,7 @@ A API escuta na porta `8080`. O PostgreSQL usa a porta `5432`. No desenho espera
 
 ## Requisitos
 
-- Java JDK 25
+- Java JDK 21
 - Maven 3.9+
 - PostgreSQL
 - Git (opcional para clonar o repositório)
