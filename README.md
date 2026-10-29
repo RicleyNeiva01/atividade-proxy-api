@@ -1,171 +1,103 @@
-# API REST de Clientes — Java, Spring Boot e PostgreSQL
+# API REST de Clientes com Proxy Reverso Nginx
 
-Projeto da VM 2 para a atividade de infraestrutura com duas VMs e Nginx como proxy reverso.
+Atividade de infraestrutura com duas VMs: o cliente acessa a VM 1 (Nginx), que repassa as requisições para a API Java + PostgreSQL na VM 2.
+
+```text
+Cliente (PC) ──> VM 1 (Nginx, porta 80) ──> VM 2 (API :8080 / PostgreSQL :5432)
+```
 
 ## Integrantes
 
-- Nome completo: **PREENCHER**
-- Nome completo: **PREENCHER**
+| Nome | Responsabilidade |
+|---|---|
+| PREENCHER | API REST e banco de dados (VM 2) |
+| PREENCHER | VMs e proxy reverso Nginx (VM 1) |
 
-## Arquitetura e endereços IP
-
-Preencha os IPs reais depois de configurar a rede das máquinas:
+## IPs das máquinas
 
 | Máquina | Função | IP |
 |---|---|---|
-| VM 1 | Nginx / Proxy Reverso | `IP_DA_VM1` |
-| VM 2 | API Java + PostgreSQL | `IP_DA_VM2` |
+| VM 1 | Nginx / Proxy Reverso | PREENCHER |
+| VM 2 | API Java + PostgreSQL | PREENCHER |
 
-A API escuta na porta `8080`. O PostgreSQL usa a porta `5432`. No desenho esperado, o cliente acessa a VM 1 pela porta 80 e o Nginx encaminha a requisição para `http://IP_DA_VM2:8080`.
+## Estrutura do repositório
 
-## Requisitos
+```text
+├── api/        código-fonte da API (Spring Boot)
+├── database/   script SQL de criação do banco
+├── nginx/      arquivo de configuração do Nginx
+├── docs/       documentação das rotas da API
+└── README.md
+```
 
-- Java JDK 25
+## Requisitos (VM 2)
+
+- Java JDK 21
 - Maven 3.9+
 - PostgreSQL
-- Git (opcional para clonar o repositório)
 
-Confira as instalações:
+## Como rodar a API (VM 2)
 
-```bash
-java -version
-mvn -version
-psql --version
-```
-
-## 1. Instalar PostgreSQL no Ubuntu Server
-
-```bash
-sudo apt update
-sudo apt install postgresql postgresql-contrib -y
-sudo systemctl enable --now postgresql
-sudo systemctl status postgresql
-```
-
-## 2. Criar banco, usuário e tabela
-
-Copie o projeto para a VM 2. Execute o script como administrador do PostgreSQL:
+### 1. Criar usuário, banco e tabela
 
 ```bash
 sudo -u postgres psql -f database/schema.sql
 ```
 
-O script cria o usuário `api_user`, o banco `clientes_db`, a tabela `clientes` e dois registros de exemplo. **Antes de usar em rede real, altere a senha de exemplo no script e no ambiente da aplicação.**
+O script cria o usuário `api_user`, o banco `clientes_db`, a tabela `clientes` e dois registros de exemplo.
 
-Verifique os dados:
+### 2. Configurar a conexão (opcional)
 
-```bash
-sudo -u postgres psql -d clientes_db -c "SELECT * FROM clientes;"
-```
-
-> O arquivo `database/schema.sql` contém comandos do `psql` (`\connect`), então execute-o com `psql`, não colando o arquivo inteiro em uma ferramenta SQL genérica.
-
-## 3. Configurar conexão da API
-
-Por padrão, `src/main/resources/application.properties` usa:
-
-- URL: `jdbc:postgresql://localhost:5432/clientes_db`
-- Usuário: `api_user`
-- Senha: `troque_esta_senha`
-
-É possível sobrescrever as configurações com variáveis de ambiente:
+Por padrão a API usa `localhost:5432`, banco `clientes_db`, usuário `api_user` e senha `cliente123`. Para alterar:
 
 ```bash
 export DB_URL='jdbc:postgresql://localhost:5432/clientes_db'
 export DB_USERNAME='api_user'
-export DB_PASSWORD='SUA_SENHA_FORTE'
+export DB_PASSWORD='SUA_SENHA'
 ```
 
-Ajuste a senha no banco e na variável `DB_PASSWORD` para que sejam iguais.
-
-## 4. Compilar e executar a API
-
-Na pasta raiz do projeto:
+### 3. Compilar e executar
 
 ```bash
+cd api
 mvn clean package
 java -jar target/api-clientes-1.0.0.jar
 ```
 
-Ou em modo de desenvolvimento:
+A API sobe na porta `8080`.
 
-```bash
-mvn spring-boot:run
-```
-
-A API ficará disponível na porta `8080`. O endereço `0.0.0.0` permite receber conexões por interfaces de rede da VM, mas o firewall deve permitir apenas o tráfego necessário. Para a atividade, permita a porta 8080 a partir da VM 1 e evite expor o PostgreSQL à rede pública.
-
-## 5. Testar a API
-
-Criar cliente:
-
-```bash
-curl -i -X POST http://localhost:8080/clientes \
-  -H 'Content-Type: application/json' \
-  -d '{"nome":"João da Silva","email":"joao@example.com","telefone":"74999991234"}'
-```
-
-Listar:
+### 4. Testar
 
 ```bash
 curl -i http://localhost:8080/clientes
 ```
 
-Consultar ID 1:
+## Rotas da API
+
+| Método | Rota | Descrição |
+|---|---|---|
+| POST | `/clientes` | Cria cliente |
+| GET | `/clientes` | Lista clientes |
+| GET | `/clientes/{id}` | Busca por ID |
+| PUT | `/clientes/{id}` | Atualiza cliente |
+| DELETE | `/clientes/{id}` | Exclui cliente |
+
+Detalhes e exemplos em [`docs/rotas.md`](docs/rotas.md).
+
+## Firewall (VM 2)
+
+Libere a porta 8080 apenas para a VM 1 e não exponha o PostgreSQL:
 
 ```bash
-curl -i http://localhost:8080/clientes/1
+sudo ufw allow from IP_DA_VM1 to any port 8080 proto tcp
 ```
 
-Atualizar ID 1:
+## Nginx (VM 1)
 
-```bash
-curl -i -X PUT http://localhost:8080/clientes/1 \
-  -H 'Content-Type: application/json' \
-  -d '{"nome":"João Atualizado","email":"joao.atualizado@example.com","telefone":"74988887777"}'
-```
-
-Excluir ID 1:
-
-```bash
-curl -i -X DELETE http://localhost:8080/clientes/1
-```
-
-Os IDs devem ser os que realmente existem no banco.
-
-## 6. Testar a partir da VM 1
-
-Na VM 1, execute:
-
-```bash
-ping IP_DA_VM2
-curl -i http://IP_DA_VM2:8080/clientes
-```
-
-Se o ping funcionar, mas o `curl` não, verifique se a API está ativa, se está escutando em `0.0.0.0:8080` e se o firewall permite a porta 8080 a partir da VM 1.
-
-## Estrutura do projeto
-
-```text
-api-java-springboot-postgres/
-├── src/main/java/br/com/projetoinfra/apiclientes/
-│   ├── ApiClientesApplication.java
-│   ├── controller/ClienteController.java
-│   ├── exception/
-│   ├── model/Cliente.java
-│   ├── repository/ClienteRepository.java
-│   └── service/ClienteService.java
-├── src/main/resources/application.properties
-├── database/schema.sql
-├── docs/rotas.md
-├── pom.xml
-└── README.md
-```
+PREENCHER pelo responsável da VM 1: copiar o arquivo de `nginx/` para `/etc/nginx/sites-available/`, ativar o site em `sites-enabled/`, remover o link do `default` e recarregar o Nginx.
 
 ## Observações
 
-- O Hibernate usa `ddl-auto=validate`: ele valida o esquema, mas não cria nem apaga tabelas automaticamente.
-- E-mails duplicados retornam `409 Conflict`.
-- Campos obrigatórios e formato de e-mail são validados.
-- Não armazene senhas reais no GitHub. Use variáveis de ambiente.
-- A configuração do virtual host Nginx pertence à pasta `/nginx` do repositório geral e será feita pelo responsável pela VM 1.
+- O Hibernate usa `ddl-auto=validate`: não cria nem altera tabelas.
+- E-mail duplicado retorna `409 Conflict`; campos inválidos retornam `400`.
+- Não versione senhas reais; use variáveis de ambiente.
