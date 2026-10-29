@@ -1,8 +1,0 @@
-br\com\projetoinfra\apiclientes\controller\ClienteController.class
-br\com\projetoinfra\apiclientes\exception\TratadorDeErros.class
-br\com\projetoinfra\apiclientes\repository\ClienteRepository.class
-br\com\projetoinfra\apiclientes\model\Cliente.class
-br\com\projetoinfra\apiclientes\service\ClienteService.class
-br\com\projetoinfra\apiclientes\exception\EmailJaCadastradoException.class
-br\com\projetoinfra\apiclientes\ApiClientesApplication.class
-br\com\projetoinfra\apiclientes\exception\RecursoNaoEncontradoException.class

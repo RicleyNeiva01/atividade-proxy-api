@@ -1,8 +1,0 @@
-C:\atividadeProxyApi\Infraestrutura de Redes com Proxy Reverso e API REST\src\main\java\br\com\projetoinfra\apiclientes\ApiClientesApplication.java
-C:\atividadeProxyApi\Infraestrutura de Redes com Proxy Reverso e API REST\src\main\java\br\com\projetoinfra\apiclientes\controller\ClienteController.java
-C:\atividadeProxyApi\Infraestrutura de Redes com Proxy Reverso e API REST\src\main\java\br\com\projetoinfra\apiclientes\exception\EmailJaCadastradoException.java
-C:\atividadeProxyApi\Infraestrutura de Redes com Proxy Reverso e API REST\src\main\java\br\com\projetoinfra\apiclientes\exception\RecursoNaoEncontradoException.java
-C:\atividadeProxyApi\Infraestrutura de Redes com Proxy Reverso e API REST\src\main\java\br\com\projetoinfra\apiclientes\exception\TratadorDeErros.java
-C:\atividadeProxyApi\Infraestrutura de Redes com Proxy Reverso e API REST\src\main\java\br\com\projetoinfra\apiclientes\model\Cliente.java
-C:\atividadeProxyApi\Infraestrutura de Redes com Proxy Reverso e API REST\src\main\java\br\com\projetoinfra\apiclientes\repository\ClienteRepository.java
-C:\atividadeProxyApi\Infraestrutura de Redes com Proxy Reverso e API REST\src\main\java\br\com\projetoinfra\apiclientes\service\ClienteService.java
